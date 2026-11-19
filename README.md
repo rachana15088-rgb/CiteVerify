@@ -241,4 +241,4 @@ CiteVerify is engineered around strict ethical safeguards for academic integrity
 - **Cascading Citation Tracker**: Detect citation distortion chains across multiple generations of cited papers.
 - **Predatory Journal Detection**: Automatically flag citations from unindexed or predatory publishers.
 - **Multi-Lingual Paper Verification**: Verify non-English academic literature and cross-lingual citations.
--
+
