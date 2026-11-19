@@ -35,7 +35,7 @@ export function Hero() {
             size="lg"
             variant="outline"
             className="glass h-12 rounded-xl px-6 text-base font-semibold"
-            render={<Link href="/results" />}
+            render={<Link href="/results?sample=true" />}
             nativeButton={false}
           >
             View example report

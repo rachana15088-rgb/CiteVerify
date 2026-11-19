@@ -7,7 +7,7 @@ export type Verdict =
   | 'reference_not_found'
   | 'needs_human_review'
 
-export type SourceAccess = 'abstract_only' | 'full_text' | 'none'
+export type SourceAccess = 'metadata_only' | 'abstract_only' | 'full_text' | 'none'
 
 export type ReviewStatus = 'pending' | 'accepted' | 'overridden'
 

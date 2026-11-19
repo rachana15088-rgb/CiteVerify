@@ -106,7 +106,7 @@ export function ClaimCard({
               </h3>
               {evidence.source_access !== 'none' && (
                 <span className="rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                  {evidence.source_access === 'abstract_only' ? 'Abstract only' : 'Full text'}
+                  {evidence.source_access === 'metadata_only' ? 'Metadata only' : evidence.source_access === 'abstract_only' ? 'Abstract only' : 'Full text'}
                 </span>
               )}
             </div>

@@ -1,18 +1,59 @@
 import { NextResponse } from "next/server";
-import { extractText, getDocumentProxy } from "unpdf";
+import { getDocumentProxy } from "unpdf";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 120;
 
-const VERDICTS = [
-  "supported",
-  "partly_supported",
-  "unsupported",
-  "contradictory",
-  "possibly_outdated",
-  "reference_not_found",
-  "needs_human_review",
-];
+import type { ClaimResult, Verdict } from "@/lib/types";
+import { VERDICT_ORDER } from "@/lib/verdicts";
+
+const MAX_REQUEST_BYTES = 10 * 1024 * 1024;
+const MAX_PAGES = 100;
+const MAX_TEXT_LENGTH = 500_000;
+
+class UploadError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
+
+// No deployment byte limit, authentication, or throttling is configured in this
+// repository. Deployment controls must be verified before exposing this route.
+async function boundedFormData(req: Request) {
+  const reader = req.body?.getReader();
+  if (!reader) throw new UploadError("No PDF uploaded", 400);
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_REQUEST_BYTES) {
+        await reader.cancel();
+        throw new UploadError("Upload exceeds 10 MiB", 413);
+      }
+      chunks.push(value);
+    }
+  } finally { reader.releaseLock(); }
+  const bytes = Buffer.concat(chunks);
+  try {
+    return await new Request(req.url, {
+      method: "POST", headers: req.headers, body: bytes,
+    }).formData();
+  } catch {
+    throw new UploadError("Invalid PDF upload", 400);
+  }
+}
+
+function titlesMatch(expected: string, actual: string): boolean {
+  const normalize = (title: string) => title.toLowerCase().normalize("NFKD")
+    .replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  const a = normalize(expected), b = normalize(actual);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const left = new Set(a.split(" ")), right = new Set(b.split(" "));
+  const common = [...left].filter((word) => right.has(word)).length;
+  return common >= 3 && common / Math.max(left.size, right.size) >= 0.9;
+}
 
 type SourceMeta = {
   doi: string;
@@ -21,11 +62,11 @@ type SourceMeta = {
   found: boolean;
 };
 
-function normalizeVerdict(raw: string): string {
-  const v = (raw || "").toLowerCase().trim().replace(/\s+/g, "_");
+function normalizeVerdict(raw: unknown): Verdict {
+  const v = (typeof raw === "string" ? raw : "").toLowerCase().trim().replace(/\s+/g, "_");
   if (v === "partially_supported") return "partly_supported";
   if (v === "outdated") return "possibly_outdated";
-  return VERDICTS.includes(v) ? v : "needs_human_review";
+  return VERDICT_ORDER.includes(v as Verdict) ? v as Verdict : "needs_human_review";
 }
 
 function parseReference(ref: string) {
@@ -46,7 +87,7 @@ async function fetchCrossRefSource(ref: string): Promise<SourceMeta> {
 
   try {
     const res = await fetch(
-      `https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=1`,
+      `https://api.crossref.org/works?query.bibliographic=${encodeURIComponent(query)}&rows=5`,
       {
         headers: { "User-Agent": "CiteVerify/1.0 (mailto:team@citeverify.org)" },
         signal: AbortSignal.timeout(5000),
@@ -54,7 +95,10 @@ async function fetchCrossRefSource(ref: string): Promise<SourceMeta> {
     );
     if (!res.ok) return { doi: "", url: "", abstract: "", found: false };
     const data = await res.json();
-    const item = data?.message?.items?.[0];
+    const candidates = data?.message?.items;
+    const item = Array.isArray(candidates) ? candidates.find((candidate) =>
+      Array.isArray(candidate.title) && candidate.title.some((title: unknown) =>
+        typeof title === "string" && titlesMatch(parsed.title, title))) : undefined;
     if (!item) return { doi: "", url: "", abstract: "", found: false };
 
     const doi = item.DOI || "";
@@ -68,15 +112,41 @@ async function fetchCrossRefSource(ref: string): Promise<SourceMeta> {
 }
 export async function POST(req: Request) {
   try {
-    const form = await req.formData();
+    const form = await boundedFormData(req);
     const file = form.get("file");
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "No PDF uploaded" }, { status: 400 });
     }
 
-    // 1. Extract text and title from the uploaded PDF
-    const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
-    const { text } = await extractText(pdf, { mergePages: true });
+    if (file.type !== "application/pdf") {
+      throw new UploadError("Upload must be a PDF", 400);
+    }
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (new TextDecoder().decode(bytes.subarray(0, 5)) !== "%PDF-") {
+      throw new UploadError("Upload must be a valid PDF", 400);
+    }
+    let text = "";
+    let pdf: Awaited<ReturnType<typeof getDocumentProxy>> | undefined;
+    try {
+      pdf = await getDocumentProxy(bytes);
+      if (pdf.numPages > MAX_PAGES) throw new UploadError("PDF exceeds 100 pages", 413);
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        const pageText = content.items.map((item) => "str" in item ? item.str + (item.hasEOL ? "\n" : " ") : "").join("");
+        if (text.length + pageText.length + 1 > MAX_TEXT_LENGTH) {
+          throw new UploadError("PDF text exceeds the processing limit", 413);
+        }
+        text += pageText + "\n";
+        page.cleanup();
+      }
+    } catch (error) {
+      if (error instanceof UploadError) throw error;
+      console.error("PDF parsing failed", error);
+      return NextResponse.json({ error: "Could not parse this PDF" }, { status: 422 });
+    } finally {
+      await pdf?.loadingTask.destroy();
+    }
     const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
     let title = lines[0] || "";
     if (
@@ -152,7 +222,7 @@ export async function POST(req: Request) {
     // 5. Verify claims against retrieved CrossRef metadata/abstracts via Gemini
     const key = process.env.LLM_API_KEY?.trim();
     if (!key) {
-      return NextResponse.json({ error: "Missing LLM_API_KEY in .env.local." }, { status: 500 });
+      return NextResponse.json({ error: "Analysis service unavailable" }, { status: 500 });
     }
 
     const prompt =
@@ -163,7 +233,7 @@ export async function POST(req: Request) {
       `- "unsupported": the cited study recommends something different or lacks evidence for the claim's specific assertion.\n` +
       `- "supported": the cited study directly confirms the claim.\n` +
       `Return ONLY a JSON array, one object per input, in the same order:\n` +
-      `{"id": string, "claim": string, "verdict": one of ${JSON.stringify(VERDICTS)}, "evidence_quote": string, "explanation": one clear sentence, "confidence": number 0-1}.\n\n` +
+      `{"id": string, "claim": string, "verdict": one of ${JSON.stringify(VERDICT_ORDER)}, "evidence_quote": string, "explanation": one clear sentence, "confidence": number 0-1}.\n\n` +
       `INPUT:\n` +
       JSON.stringify(
         limited.map((i) => {
@@ -197,16 +267,19 @@ export async function POST(req: Request) {
               generationConfig: {
                 responseMimeType: "application/json",
                 temperature: 0.1,
-                thinkingConfig: { thinkingBudget: 0 },
+                ...(/^gemini-2\.5-flash(?:-|$)/.test(m)
+                  ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
               },
             }),
-            signal: AbortSignal.timeout(12000),
+            signal: AbortSignal.timeout(30000),
           }
         );
         if (res.ok) {
           const data = await res.json();
           const rawText = (data.candidates?.[0]?.content?.parts ?? []).map((p: any) => p.text ?? "").join("");
-          parsedVerdicts = JSON.parse(rawText);
+          const candidate = JSON.parse(rawText);
+          if (!Array.isArray(candidate)) throw new Error("Invalid AI response");
+          parsedVerdicts = candidate;
           break;
         }
         lastErr = `AI service error (${res.status})`;
@@ -216,23 +289,21 @@ export async function POST(req: Request) {
     }
 
     if (parsedVerdicts.length === 0) {
-      return NextResponse.json({ error: lastErr }, { status: 504 });
+      console.error("AI analysis failed", lastErr);
+      return NextResponse.json({ error: "Analysis service unavailable" }, { status: 504 });
     }
 
-    const byId = new Map(parsedVerdicts.map((v: any) => [v.id, v]));
-    const results = limited.map((it) => {
+    const byId = new Map(parsedVerdicts.filter((v) => v && typeof v === "object").map((v: any) => [v.id, v]));
+    const results: ClaimResult[] = limited.map((it) => {
       const v = byId.get(it.id);
       const parsed = parseReference(it.ref);
       const src = sourceByRefNum.get(it.refNum);
       const hasAbstract = Boolean(src?.abstract);
       const hasSource = Boolean(src?.found);
 
-      const rawConf = Number(v?.confidence) || 0.8;
-      const calibratedConf = hasAbstract
-        ? Math.min(Math.max(rawConf, 0.82), 0.96)
-        : hasSource
-          ? Math.min(Math.max(rawConf, 0.72), 0.85)
-          : Math.min(rawConf, 0.5);
+      const rawConf = typeof v?.confidence === "number" && Number.isFinite(v.confidence)
+        ? Math.max(0, Math.min(1, v.confidence)) : 0;
+      const calibratedConf = Math.min(rawConf, hasAbstract ? 0.96 : hasSource ? 0.85 : 0.5);
 
       const flags: string[] = [];
       if (!it.ref) flags.push("reference_missing");
@@ -253,11 +324,13 @@ export async function POST(req: Request) {
           url: src?.url || "",
         },
         evidence: {
-          passage: v?.evidence_quote || (hasAbstract ? src!.abstract.slice(0, 320) + "..." : ""),
+          passage: hasAbstract
+            ? (typeof v?.evidence_quote === "string" && v.evidence_quote.trim() && src!.abstract.includes(v.evidence_quote)
+              ? v.evidence_quote : src!.abstract.slice(0, 320)) : "",
           location: hasAbstract ? "CrossRef Abstract" : hasSource ? "CrossRef Metadata" : "",
           source_access: hasAbstract ? "abstract_only" : hasSource ? "metadata_only" : "none",
         },
-        verdict: !it.ref ? "reference_not_found" : normalizeVerdict(v?.verdict),
+        verdict: !it.ref ? "reference_not_found" : !hasAbstract ? "needs_human_review" : normalizeVerdict(v?.verdict),
         explanation: v?.explanation || "Reviewed against source metadata.",
         confidence: v ? Number(calibratedConf.toFixed(2)) : 0,
         flags,
@@ -266,7 +339,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ document: { title, claims_total: results.length }, results });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Analysis failed" }, { status: 500 });
+  } catch (e: unknown) {
+    if (e instanceof UploadError) return NextResponse.json({ error: e.message }, { status: e.status });
+    console.error("Analysis failed", e);
+    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
  }
 }

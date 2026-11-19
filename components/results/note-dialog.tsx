@@ -24,7 +24,12 @@ export function NoteDialog({
   initialNote: string
   onSubmit: (note: string) => void
 }) {
-  const [note, setNote] = useState('')
+  const [note, setNote] = useState(initialNote)
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) setNote(initialNote)
+  }
 
   function handleOpenChange(next: boolean) {
     setNote(next ? initialNote : '')

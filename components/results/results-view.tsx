@@ -1,10 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import Link from 'next/link'
 import { ArrowLeft, Download, FileText, Search } from 'lucide-react'
-import { getResults } from '@/lib/api'
+import { analysisCacheKey, getResults, saveResults } from '@/lib/api'
 import type { AnalysisResponse, ClaimResult, ReviewHistoryEntry, Verdict } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,8 +19,15 @@ export interface ReviewActions {
   addNote: (id: string, note: string) => void
 }
 
-export function ResultsView() {
-  const { data, error, isLoading, mutate } = useSWR('analysis', getResults, {
+export function ResultsView({ sample = false }: { sample?: boolean }) {
+  const [storageError, setStorageError] = useState(false)
+  const [cacheKey, setCacheKey] = useState<string | null>(null)
+  useEffect(() => {
+    try { setCacheKey(analysisCacheKey(sample)) }
+    catch { setCacheKey(sample ? 'analysis:sample' : 'analysis:unavailable') }
+  }, [sample])
+  const { data, error, isLoading, mutate } = useSWR(
+    cacheKey, () => getResults(sample), {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   })
@@ -28,14 +35,12 @@ export function ResultsView() {
   const [query, setQuery] = useState('')
 
   function updateClaim(id: string, update: (claim: ClaimResult) => ClaimResult) {
-    mutate(
-      (current) =>
-        current && {
-          ...current,
-          results: current.results.map((c) => (c.id === id ? update(c) : c)),
-        },
-      { revalidate: false },
-    )
+    void mutate((current) => {
+      if (!current) return current
+      const next = { ...current, results: current.results.map((c) => c.id === id ? update(c) : c) }
+      setStorageError(!saveResults(next, sample))
+      return next
+    }, { revalidate: false })
   }
 
   function withHistory(claim: ClaimResult, entry: ReviewHistoryEntry): ClaimResult['review'] {
@@ -89,7 +94,7 @@ export function ResultsView() {
     })
   }, [data, activeVerdict, query])
 
-  if (isLoading) return <ResultsSkeleton />
+  if (!cacheKey || isLoading) return <ResultsSkeleton />
 
   if (error || !data) {
     return (
@@ -105,6 +110,7 @@ export function ResultsView() {
 
   return (
     <div className="flex flex-col gap-6">
+      {storageError && <p role="alert">Review changes could not be saved for reload.</p>}
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
           <Link
@@ -241,7 +247,8 @@ function exportJsonReport(data: AnalysisResponse) {
 
 function exportHumanReport(data: AnalysisResponse) {
   const counts = data.results.reduce<Record<string, number>>((acc, r) => {
-    acc[r.verdict] = (acc[r.verdict] || 0) + 1
+    if (r.verdict !== 'needs_human_review') acc[r.verdict] = (acc[r.verdict] || 0) + 1
+    if (matchesVerdictFilter(r, 'needs_human_review')) acc.needs_human_review = (acc.needs_human_review || 0) + 1
     return acc
   }, {})
 

@@ -43,9 +43,9 @@ export function UploadFlow() {
     work
       .then((data) => {
         if (cancelled) return
-        saveResults(data) // null clears storage, so the sample data shows
+        if (!saveResults(data, !job.file)) throw new Error("Could not save analysis results. Please enable session storage and try again.")
         setCurrentStep(ANALYSIS_STEPS.length)
-        redirect = setTimeout(() => router.push('/results'), 400)
+        redirect = setTimeout(() => router.push(job.file ? '/results' : '/results?sample=true'), 400)
       })
       .catch((e: Error) => {
         if (!cancelled) setError(e.message || 'Something went wrong.')

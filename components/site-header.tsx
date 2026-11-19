@@ -22,7 +22,7 @@ export function SiteHeader() {
             <span className="flex size-9 items-center justify-center rounded-xl bg-primary/20 text-primary ring-1 ring-primary/30">
               <Search className="size-4" strokeWidth={2.5} aria-hidden="true" />
             </span>
-            <span className="font-display text-lg font-bold tracking-tight">
+            <span className="hidden sm:block font-display text-lg font-bold tracking-tight">
               Cite<span className="text-primary">Verify</span>
             </span>
           </Link>

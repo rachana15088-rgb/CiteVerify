@@ -4,14 +4,22 @@ import type { AnalysisResponse } from '@/lib/types'
 const STORAGE_KEY = 'citeverify:analysis'
 const MOCK_LATENCY_MS = 700
 
-/** Remember the latest real analysis. Pass null to clear it (sample document). */
-export function saveResults(data: AnalysisResponse | null) {
+export function saveResults(data: AnalysisResponse | null, sample = false): boolean {
   try {
-    if (data) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-    else sessionStorage.removeItem(STORAGE_KEY)
+    const key = sample ? `${STORAGE_KEY}:sample` : STORAGE_KEY
+    if (data) sessionStorage.setItem(key, JSON.stringify(data))
+    else sessionStorage.removeItem(key)
+    return true
   } catch {
-    // storage unavailable: results page falls back to the sample data
+    return false
   }
+}
+
+/** A new identity prevents SWR from serving the previous upload. */
+export function analysisCacheKey(sample = false): string {
+  if (sample) return 'analysis:sample'
+  const saved = sessionStorage.getItem(STORAGE_KEY)
+  return `analysis:saved:${saved ?? 'empty'}`
 }
 
 /** Send the uploaded PDF to our /api/analyze route. */
@@ -26,6 +34,7 @@ export async function analyzeFile(file: File): Promise<AnalysisResponse> {
     // response was not JSON
   }
   if (!res.ok) throw new Error(json?.error || `Analysis failed (${res.status})`)
+  if (!Array.isArray(json?.results)) throw new Error("Invalid analysis response")
   return json as AnalysisResponse
 }
 
@@ -34,9 +43,9 @@ export async function analyzeFile(file: File): Promise<AnalysisResponse> {
  * Real analysis if one was saved, otherwise the sample data.
  * To use the Python backend later, replace the body with a fetch to it.
  */
-export async function getResults(): Promise<AnalysisResponse> {
+export async function getResults(sample = false): Promise<AnalysisResponse> {
   try {
-    const saved = sessionStorage.getItem(STORAGE_KEY)
+    const saved = sessionStorage.getItem(sample ? `${STORAGE_KEY}:sample` : STORAGE_KEY)
     if (saved) return JSON.parse(saved) as AnalysisResponse
   } catch {
     // ignore and fall back to the sample
