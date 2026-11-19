@@ -214,13 +214,11 @@ CiteVerify queries a resilient federation of academic data providers:
 
 ## 🛠️ Tech Stack
 
-- **Backend Framework**: Python (FastAPI / Flask)
-- **Document Ingestion**: PyMuPDF (`fitz`), Grobid, `pdfminer.six`
-- **NLP & Claim Detection**: spaCy (`en_core_sci_sm`), SciBERT
-- **Passage Retrieval**: Sentence-Transformers (`all-MiniLM-L6-v2` / `SPECTER2`)
-- **Natural Language Inference (NLI)**: DeBERTa-v3 / Cross-Encoders
+- **Frontend / UI**: TypeScript, React / Next.js (Tailwind CSS)
+- **Backend & Database**: Supabase (PostgreSQL, Edge Functions, Storage)
+- **Document & Claim Processing**: PDF Parsing, NLP & Natural Language Inference (NLI)
 - **Scholarly APIs**: CrossRef REST API, OpenAlex API, Semantic Scholar API
-- **Frontend / UI**: Streamlit / React (Tailwind CSS)
+
 
 ---
 
