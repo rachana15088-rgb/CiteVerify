@@ -1,375 +1,299 @@
-Preview unavailable
+<p align="center">
+  <img src="[https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,11,24&height=220&section=header&text=CiteVerify&fontSize=62&fontAlignY=36&fontColor=ffffff&desc=Scientific%20Claim%20%26%20Citation%20Verification%20Engine&descFontSize=20&descAlignY=58&descAlign=50](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,11,24&height=220&section=header&text=CiteVerify&fontSize=62&fontAlignY=36&fontColor=ffffff&desc=Scientific%20Claim%20%26%20Citation%20Verification%20Engine&descFontSize=20&descAlignY=58&descAlign=50)" alt="CiteVerify Banner" width="100%" />
+</p>
 
-Architecture
-Taxonomy
-Scholarly APIs
-Academic Trust
-License
+<p align="center">
+  <img src="[https://img.shields.io/badge/Problem%20Statement-03%20CiteVerify-blueviolet?style=for-the-badge&logo=googlescholar](https://img.shields.io/badge/Problem%20Statement-03%20CiteVerify-blueviolet?style=for-the-badge&logo=googlescholar)" alt="Problem Statement 03" />
+  <img src="[https://img.shields.io/badge/Domain-Research%20Tech%20%26%20Academic%20Integrity-blue?style=for-the-badge](https://img.shields.io/badge/Domain-Research%20Tech%20%26%20Academic%20Integrity-blue?style=for-the-badge)" alt="Domain" />
+  <img src="[https://img.shields.io/badge/Verification-5--Tier%20Explainable%20Taxonomy-emerald?style=for-the-badge](https://img.shields.io/badge/Verification-5--Tier%20Explainable%20Taxonomy-emerald?style=for-the-badge)" alt="Taxonomy" />
+  <img src="[https://img.shields.io/badge/Compliance-Human--In--The--Loop%20Audit-amber?style=for-the-badge](https://img.shields.io/badge/Compliance-Human--In--The--Loop%20Audit-amber?style=for-the-badge)" alt="Human In The Loop" />
+  <img src="[https://img.shields.io/badge/Hackathon-INNOVEDGE%202026-orange?style=for-the-badge](https://img.shields.io/badge/Hackathon-INNOVEDGE%202026-orange?style=for-the-badge)" alt="INNOVEDGE 2026" />
+</p>
 
-Built for INNOVEDGE Hackathon 2026 • Problem Statement 03
-Empowering Researchers, Reviewers, and Academic Institutions with Evidence-Backed Integrity Auditing.
+<p align="center">
+  <b>CiteVerify</b> is an intelligent, evidence-grounded academic verification platform that audits scientific papers, extracts claims and citation anchors, retrieves original literature via DOIs/scholarly APIs, and checks whether cited sources genuinely prove what authors claim.
+</p>
 
-📖 Table of Contents
-🎯 Executive Summary & The Problem
-✨ Core Capabilities
-🏗️ System Architecture
-🔄 Verification Pipeline Workflow
-⚖️ 5-Tier Verdict Taxonomy & Confidence Scoring
-🔍 Anatomy of an Evidence-Backed Audit Report
-🌐 Cross-Corpus Retrieval Swarm
-🛠️ Tech Stack & Engineering Specifications
-📂 Repository Structure
-🚀 Quickstart & Setup Guide
-📊 Evaluation, Benchmarks & Precision
-🛡️ Academic Trust & Anti-Hallucination Framework
-🔮 Roadmap & Future Horizons
-👥 Contributing & Team
-🎯 Executive Summary & The Problem
+---
 
-Scientific discovery rests upon a foundation of mutual trust and referenced evidence. However, modern scientific publishing faces a quiet crisis of citation integrity:
+## 📌 Table of Contents
+- [🎯 The Challenge & Mission](#-the-challenge--mission)
+- [✨ Core Capabilities](#-core-capabilities)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🔄 Verification Workflow](#-verification-workflow)
+- [⚖️ 5-Tier Claim Status Taxonomy](#️-5-tier-claim-status-taxonomy)
+- [🔬 Interactive Verification Result Anatomy](#-interactive-verification-result-anatomy)
+- [🌐 Multi-Corpus Retrieval Swarm](#-multi-corpus-retrieval-swarm)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🚀 Quickstart & Setup Guide](#-quickstart--setup-guide)
+- [🛡️ Build for Academic Trust: Guiding Principles](#️-build-for-academic-trust-guiding-principles)
+- [🔮 Future Scope](#-future-scope)
 
-             ┌─────────────────────────────────────────────────────────────┐
-             │                  THE CITATION DECEPTION GAP                 │
-             └─────────────────────────────────────────────────────────────┘
-  [Claimed Statement]                                        [Actual Paper Evidence]
- "Drug X demonstrated an 85%                               "In vitro testing in murine
-  efficacy rate in human                                    cultures showed an initial 
-  clinical trials [12]."                                    inhibition of 35% (n=12)."
-           ▲                                                           ▲
-           │                                                           │
-           └────────────[ CITATION MISATTRIBUTION & SCOPE CREEP ]──────┘
-                               (UNDETECTED BY TRADITIONAL TOOLS)
-The 4 Pillars of Citation Failure:
-Scope Exaggeration & Over-Generalization: In vitro or small animal findings cited as proof of broad human clinical outcomes.
-Ghost & Mismatched Citations: Generic bibliographies where Reference [18] has zero conceptual connection to the citing sentence.
-Zombie Citations (Retraction Blindness): Continued citation of discredited, retracted, or disputed literature years after retraction notices are issued.
-Circular "Paper-Mill" Echo Chambers: Cross-citations engineered to inflate h-indices without substantive empirical grounding.
+---
 
-IMPORTANT
+## 🎯 The Challenge & Mission
 
-CiteVerify is an autonomous, explainable scientific claim and citation verification engine. It ingests academic manuscripts, extracts declarative claims and in-text citation anchors, resolves primary literature across global bibliographic indexes (CrossRef, Semantic Scholar, OpenAlex, PubMed), performs dense natural language inference (NLI), and generates court-admissible, evidence-grounded academic verification dossiers.
+### The Problem
+In academic writing, students, researchers, and reviewers rely on citations to validate empirical statements. However:
+- **Misleading References**: A reference may be genuine, but the cited paper does not actually prove or even discuss the specific claim.
+- **Scope Creep & Exaggeration**: Authors often generalize small in vitro or pilot studies into sweeping universal claims.
+- **Outdated / Retracted Works**: Papers cite superseded literature or studies flagged on Retraction Watch.
+- **The Manual Verification Bottleneck**: Reviewing dozens of references across 40-page papers manually is exhausting, leaving unsupported claims undetected.
 
-✨ Core Capabilities
-Capability	What CiteVerify Does	Why It Sets a New Standard
-📑 Intelligent Document Parsing	Deep parsing of PDF, LaTeX (.tex), and DOCX with section hierarchy awareness.	Filters out acknowledgments, boilerplates, and isolates empirical claims from speculative discussion.
-🎯 Claim-Citation Anchor Mapping	Pinpoints numeric, causal, and observational claims and ties them to bracketed [1], author-year (Vaswani et al., 2017), or superscript citations.	Resolves ambiguous and multi-reference clusters (e.g., [14-17]) into discrete atomic assertions.
-🌐 Autonomous Literature Retrieval	Multi-hop resolution engine hitting DOIs, arXiv IDs, PMIDs, CrossRef, Semantic Scholar, and OpenAlex.	Automatically fetches Open-Access full-text XML/PDF or high-fidelity abstracts without manual searching.
-🔬 Dual-Stage Semantic Grounding	Bi-encoder dense passage retrieval + Cross-encoder reranker to extract target paragraphs from 30+ page source papers.	Zeroes in on the precise tables, results sections, or methodology notes relevant to the specific claim.
-⚖️ 5-Tier NLI Verdict Engine	Classifies claims into Supported, Partially Supported, Unsupported, Contradictory, or Outdated/Retracted.	Replaces binary "true/false" with calibrated academic nuances and explicit scope limitations.
-🛡️ Retraction Watch Sentinel	Real-time cross-referencing against global Retraction databases and CrossMark status.	Instantly flags zombie citations and predatory journal references before publication.
-📊 Human-in-the-Loop Audit Dossier	Interactive side-by-side verification reports with uncertainty quantification and exportable PDF/JSON evidence sheets.	Respects peer-reviewer judgment—every automated finding provides verifiable source links and verbatim passages.
-🏗️ System Architecture
+### The Mission
+> **Build for Academic Trust:** *"A citation is not proof by itself."*  
+> CiteVerify inspects academic documents, isolates empirical claims and their corresponding citation markers (`[1]`, `(Smith et al., 2022)`), retrieves the original source texts, and verifies whether the original findings substantiate, partially support, or contradict the assertions made.
 
-CiteVerify is engineered as an event-driven, decoupled pipeline combining high-performance document extraction, distributed API retrieval, and fine-tuned scientific Natural Language Inference (NLI):
+---
 
-🔄 Verification Pipeline Workflow
+## ✨ Core Capabilities
 
-Here is how an academic paper moves from raw submission to an auditable verification report:
+| Capability | Functionality |
+| :--- | :--- |
+| **📑 Document & Claim Extraction** | Parses PDF, DOCX, and LaTeX papers to extract testable claims, statistics, percentages, and methodological findings. |
+| **🔗 Citation Detection & Mapping** | Resolves in-text markers (`[1]`, `[12-15]`, Author-Year) and links them precisely to entries in the bibliography. |
+| **🔎 Original Paper Retrieval** | Queries scholarly indexes (CrossRef, OpenAlex, Semantic Scholar, arXiv, PubMed) via DOI, title, and authors. |
+| **📊 Evidence Passage Extraction** | Employs dense passage retrieval to locate the exact paragraphs, result tables, and caveats inside the original paper. |
+| **⚖️ Claim Status Classification** | Categorizes claims into a 5-tier explainable taxonomy (Supported, Partly Supported, Unsupported, Contradictory, Outdated). |
+| **🚩 Misleading Reference Detection** | Flags ghost citations, circular references, paper-mill patterns, and mismatched claims. |
+| **🔍 Evidence & Source Traceability** | Displays side-by-side claim vs. source passage, page number, and direct external DOI links. |
+| **📋 Auditable Verification Report** | Exports a structured, calibrated report with confidence indicators for human reviewers. |
 
-⚖️ 5-Tier Verdict Taxonomy & Confidence Scoring
+---
 
-Rather than naive true/false heuristics, CiteVerify categorizes claims into an academically rigorous taxonomy:
+## 🏗️ System Architecture
 
+CiteVerify is built as a modular, end-to-end pipeline combining natural language processing, scholarly API integrations, and natural language inference (NLI):
+
+```mermaid
+flowchart TB
+    subgraph INGESTION["1. INGESTION & DOCUMENT EXTRACTION"]
+        DOC["📄 Upload Document<br/>(PDF / LaTeX / DOCX)"] --> PARSER["Document Layout Parser<br/>(Grobid / PyMuPDF)"]
+        PARSER --> CHUNKS["Sentence & Paragraph Splitter"]
+        PARSER --> BIBLIO["Bibliography & Reference List Extractor"]
+    end
+
+    subgraph CLAIM_MAPPING["2. CLAIM & CITATION ANCHORING"]
+        CHUNKS --> CLAIM_DETECTOR["Claim Identification Model<br/>(Identifies stats, facts, conclusions)"]
+        CLAIM_DETECTOR --> ATOMIC_CLAIMS["Atomic Empirical Claims"]
+        BIBLIO & ATOMIC_CLAIMS --> CITATION_MAPPER["Citation Anchor Matcher<br/>([1], Author-Year Mapping)"]
+    end
+
+    subgraph RETRIEVAL["3. ORIGINAL SOURCE RETRIEVAL SWARM"]
+        CITATION_MAPPER --> RESOLVER["DOI / Metadata Normalizer"]
+        RESOLVER --> APIS{{"Scholarly APIs Swarm"}}
+        APIS --> CROSSREF["CrossRef API"]
+        APIS --> OPENALEX["OpenAlex API"]
+        APIS --> S2["Semantic Scholar"]
+        APIS --> RETRACT_WATCH["Retraction Watch DB"]
+    end
+
+    subgraph COMPARISON["4. EVIDENCE COMPARISON & NLI CLASSIFIER"]
+        APIS --> SOURCE_TEXT["Original Paper Full-Text / Abstract"]
+        SOURCE_TEXT --> PASSAGE_RETRIEVER["Dense Passage Retriever<br/>(Bi-Encoder Semantic Matcher)"]
+        PASSAGE_RETRIEVER --> TOP_PASSAGES["Top Relevant Source Passages"]
+        TOP_PASSAGES & ATOMIC_CLAIMS --> NLI["Scientific NLI Engine<br/>(Premise vs. Hypothesis Inference)"]
+        RETRACT_WATCH --> NLI
+    end
+
+    subgraph REPORTING["5. VERIFICATION REPORT & AUDIT"]
+        NLI --> VERDICT_CALC["Verdict Classifier & Confidence Calibrator"]
+        VERDICT_CALC --> REPORT["Evidence-Backed Verification Report"]
+        REPORT --> DASHBOARD["Interactive Web Dashboard"]
+        REPORT --> EXPORT["Export Structured Dossier (PDF / JSON)"]
+    end
+
+    style INGESTION fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#f8fafc
+    style CLAIM_MAPPING fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#f8fafc
+    style RETRIEVAL fill:#1e293b,stroke:#06b6d4,stroke-width:2px,color:#f8fafc
+    style COMPARISON fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#f8fafc
+    style REPORTING fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#f8fafc
+```
+
+---
+
+## 🔄 Verification Workflow
+
+The end-to-end lifecycle of a verification scan:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Student / Researcher / Reviewer
+    participant Ingest as 1. Document Ingest
+    participant Parser as 2. Claim & Citation Extractor
+    participant Swarm as 3. Source Retrieval Swarm
+    participant NLI as 4. Evidence Comparator (NLI)
+    participant Dossier as 5. Verification Report
+
+    User->>Ingest: Upload academic manuscript (PDF)
+    Ingest->>Parser: Parse text sections & extract reference list
+    Parser->>Parser: Map in-text citation anchors (e.g., "[4]") to references
+    Parser->>Parser: Extract specific claims needing evidence
+    Parser->>Swarm: Query source metadata (Title, DOI, Authors)
+    Swarm->>Swarm: Check Retraction Watch status
+    Swarm->>Swarm: Fetch paper abstract / open-access full text
+    Swarm-->>NLI: Transmit retrieved source text & metadata
+    Parser-->>NLI: Transmit document claim
+    NLI->>NLI: Locate relevant evidence passages (Bi-Encoder)
+    NLI->>NLI: Compare claim against source evidence (NLI Cross-Encoder)
+    NLI->>NLI: Determine verdict & calculate confidence score
+    NLI->>Dossier: Compile claim-by-claim breakdown with source links
+    Dossier->>User: Display interactive report & flag issues for review
+```
+
+---
+
+## ⚖️ 5-Tier Claim Status Taxonomy
+
+CiteVerify replaces binary "true/false" checks with an explainable, 5-state academic taxonomy:
+
+| Status | Badge | Criteria |
+| :--- | :--- | :--- |
+| **Supported** | 🟢 **SUPPORTED** | Source directly confirms claim data, metrics, and causal direction. |
+| **Partly Supported** | 🟡 **PARTIAL** | General premise is mentioned, but figures differ, or scope is magnified. |
+| **Unsupported** | 🔴 **NO PROOF** | Cited paper makes no mention of the specific claim or numbers asserted. |
+| **Contradictory** | 🟣 **CONFLICT** | Source paper's findings directly refute or contradict the author's statement. |
+| **Outdated / Retracted** | 🟠 **RETRACTED** | Paper has a formal retraction notice or is superseded by consensus reviews. |
+
+---
+
+## 🔬 Interactive Verification Result Anatomy
+
+Every analyzed claim produces a structured, transparent result card:
+
+```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                       5-TIER CLAIM CLASSIFICATION                            │
-├───────────────────┬──────────────┬───────────────────────────────────────────┤
-│ VERDICT           │ COLOR / BADGE│ SCIENTIFIC CRITERIA                       │
-├───────────────────┼──────────────┼───────────────────────────────────────────┤
-│ Supported         │ 🟢 SUPPORTED │ Direct empirical alignment; data & causal │
-│                   │              │ directions match source conclusions.      │
-├───────────────────┼──────────────┼───────────────────────────────────────────┤
-│ Partially         │ 🟡 PARTIAL   │ Directionally true, but contains scope    │
-│ Supported         │              │ exaggeration, missing caveats or metrics. │
-├───────────────────┼──────────────┼───────────────────────────────────────────┤
-│ Unsupported       │ 🔴 NO PROOF  │ Cited paper contains no relevant mention  │
-│                   │              │ or data proving the asserted claim.       │
-├───────────────────┼──────────────┼───────────────────────────────────────────┤
-│ Contradictory     │ 🟣 CONFLICT  │ Source paper's explicit findings disprove │
-│                   │              │ or invert the author's statement.         │
-├───────────────────┼──────────────┼───────────────────────────────────────────┤
-│ Outdated /        │ 🟠 RETRACTED │ Source has been retracted, superseded, or │
-│ Retracted         │              │ refuted by subsequent consensus papers.   │
-└───────────────────┴──────────────┴───────────────────────────────────────────┘
-Calibrated Uncertainty Score:
+│ CLAIM AUDIT REPORT #042                               [ VERDICT: PARTIALLY SUPPORTED ]│
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 📝 UPLOADED DOCUMENT CLAIM:                                                  │
+│ "A particular study found that an AI-driven learning app improved test       │
+│  scores by 30%."                                                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 📚 MATCHED CITATION:                                                         │
+│ [4] Sharma et al. (2023), "Adaptive Interfaces in Classrooms",               │
+│     Journal of EdTech, DOI: 10.1016/j.jedtech.2023.04.012                   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 🔍 RELEVANT SOURCE EVIDENCE:                                                 │
+│ "The pilot cohort demonstrated improved engagement. However, summative test  │
+│  scores showed a modest 4.2% increase across the sample (n=30), which did    │
+│  not achieve statistical significance (p=0.07)." (Section 4, Page 8)         │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 💡 EXPLANATION:                                                              │
+│ The source paper discusses score improvement, but records only a 4.2%        │
+│ change in a small pilot group. The asserted 30% metric is NOT supported by   │
+│ the cited paper.                                                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ 📊 CONFIDENCE: 92% (High Confidence)   | 🔗 SOURCE TRACE: https://doi.org/... │
+│ 🚩 FLAG: Needs Human Review (Metric discrepancy detected)                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
 
-Every verdict is coupled with a Calibrated Confidence Index (0% - 100%) calculated via:
-Confidence
-=
-𝑤
-1
-⋅
-Sim
-dense
-(
-Claim
-,
-Passage
-)
-+
-𝑤
-2
-⋅
-𝑃
-NLI
-(
-Entailment
-)
-+
-𝑤
-3
-⋅
-Authority
-(
-Source
-)
-Confidence=w
-1
-	​
+---
 
-⋅Sim
-dense
-	​
+## 🌐 Multi-Corpus Retrieval Swarm
 
-(Claim,Passage)+w
-2
-	​
+CiteVerify queries a resilient federation of academic data providers:
 
-⋅P
-NLI
-	​
+```text
+                  ┌────────────────────────┐
+                  │ Citation Query / DOI   │
+                  └───────────┬────────────┘
+                              │
+      ┌───────────────────────┼───────────────────────┐
+      ▼                       ▼                       ▼
+┌──────────────┐        ┌──────────────┐        ┌──────────────┐
+│   CrossRef   │        │   OpenAlex   │        │Semantic Schol│
+│  (Metadata,  │        │ (Open Access │        │(Citation Net,│
+│  DOI links)  │        │  Full-Text)  │        │ TLDR graphs) │
+└──────┬───────┘        └──────┬───────┘        └──────┬───────┘
+       │                       │                       │
+       └───────────────────────┼───────────────────────┘
+                               ▼
+                ┌────────────────────────────┐
+                │ Retraction Watch Sentinel  │
+                │ (Flag Retracted Papers)    │
+                └─────────────┬──────────────┘
+                              ▼
+                ┌────────────────────────────┐
+                │ Full-Text / Abstract Cache │
+                └────────────────────────────┘
+```
 
-(Entailment)+w
-3
-	​
+---
 
-⋅Authority(Source)
-Where:
+## 🛠️ Tech Stack
 
-Sim
-dense
-Sim
-dense
-	​
+- **Backend Framework**: Python (FastAPI / Flask)
+- **Document Ingestion**: PyMuPDF (`fitz`), Grobid, `pdfminer.six`
+- **NLP & Claim Detection**: spaCy (`en_core_sci_sm`), SciBERT
+- **Passage Retrieval**: Sentence-Transformers (`all-MiniLM-L6-v2` / `SPECTER2`)
+- **Natural Language Inference (NLI)**: DeBERTa-v3 / Cross-Encoders
+- **Scholarly APIs**: CrossRef REST API, OpenAlex API, Semantic Scholar API
+- **Frontend / UI**: Streamlit / React (Tailwind CSS)
 
- measures semantic alignment between claim and cited text.
-𝑃
-NLI
-P
-NLI
-	​
+---
 
- represents the probability distribution across entailment, neutral, and contradiction heads.
-Authority
-Authority reflects publication index verification, CrossRef registration, and citation vitality.
-🔍 Anatomy of an Evidence-Backed Audit Report
+## 🚀 Quickstart & Setup Guide
 
-Here is an authentic breakdown of how CiteVerify evaluates complex claims:
-
-Case Study: Exaggerated Metric & Scope Creep
-json
-{
-  "claim_id": "CLM-2026-0042",
-  "document_claim": "A particular study found that an AI-driven learning application improved standardized test scores by 30% [14].",
-  "in_text_location": "Section 4.2 (Discussion), Page 7, Paragraph 3",
-  "matched_citation": {
-    "citation_key": "[14]",
-    "raw_reference": "Miller et al., 2023. Adaptive Learning Interfaces in Secondary Classrooms. J. Educ. Tech., 15(2), 112-128.",
-    "doi": "10.1016/j.jedutech.2023.01.014",
-    "retraction_status": "CLEAR"
-  },
-  "retrieved_evidence": {
-    "source_section": "Results & Limitations (Page 120, Table 4)",
-    "verbatim_passage": "Students using the prototype demonstrated improved assignment completion rates (+18%). However, standardized summative examination scores rose by an average of only 4.2% across the pilot cohort (n=28), which did not achieve statistical significance (p=0.08)."
-  },
-  "audit_verdict": {
-    "status": "PARTIALLY SUPPORTED / NEEDS REVIEW",
-    "badge": "YELLOW",
-    "confidence_score": 0.94,
-    "discrepancy_analysis": "The cited study reports a modest 4.2% non-significant improvement in exam scores, directly contradicting the author's claim of a 30% boost. The 30% figure does not appear in the source text.",
-    "actionable_recommendation": "Revise sentence to accurately state the 4.2% pilot outcome or cite the intended literature."
-  }
-}
-🌐 Cross-Corpus Retrieval Swarm
-
-CiteVerify does not rely on a single siloed database. It orchestrates a fault-tolerant multi-provider retrieval pipeline:
-
-                      ┌──────────────────────┐
-                      │ Citation DOI / Query │
-                      └──────────┬───────────┘
-                                 │
-           ┌─────────────────────┼─────────────────────┐
-           ▼                     ▼                     ▼
-    ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
-    │   CrossRef    │     │   OpenAlex    │     │Semantic Scholar│
-    │  (Metadata,   │     │ (Open Access  │     │(Citation Graph│
-    │  CrossMark)   │     │  PDF Links)   │     │ & TLDRs)      │
-    └──────┬────────┘     └───────┬───────┘     └───────┬───────┘
-           │                      │                     │
-           └──────────────────────┼─────────────────────┘
-                                  ▼
-                   ┌─────────────────────────────┐
-                   │ Retraction Watch Sentinel   │
-                   │ (Flag Suspicious / Zombie)  │
-                   └──────────────┬──────────────┘
-                                  ▼
-                   ┌─────────────────────────────┐
-                   │ Full-Text Extractor & Cache │
-                   └─────────────────────────────┘
-Open Access Prioritization: Automatically interrogates Unpaywall and Europe PMC to secure legal, open-access XML/PDF copies.
-Smart Fallback: If full text is behind an institutional paywall, CiteVerify gracefully shifts to deep structured abstracts, author conclusions, and preregistration records while notifying the auditor of coverage bounds.
-🛠️ Tech Stack & Engineering Specifications
-  ┌────────────────────────────────────────────────────────────────────────┐
-  │                           TECH STACK MATRIX                            │
-  ├───────────────────┬────────────────────────────────────────────────────┤
-  │ Layer             │ Technologies & Frameworks                          │
-  ├───────────────────┼────────────────────────────────────────────────────┤
-  │ Document Parsing  │ Grobid, Docling, PyMuPDF (fitz), pdfminer.six       │
-  │ Machine Learning  │ PyTorch, Hugging Face Transformers, DeBERTa-v3     │
-  │ Embeddings & SBERT│ SPECTER2 (AllenAI), BGE-Large-EN, Contriever       │
-  │ Vector Search     │ FAISS / Qdrant (Local In-Memory Vector Store)      │
-  │ Scholarly APIs    │ Habitus CrossRef API, OpenAlex API, Semantic Graph │
-  │ Backend Core      │ FastAPI, Pydantic v2, Celery / Redis Worker Pool   │
-  │ Frontend UI       │ Next.js 14 / React, Tailwind CSS, Lucide Icons     │
-  │ Export Formats    │ PDFKit, LaTeX Diff, Standalone JSON-LD, Markdown   │
-  └───────────────────┴────────────────────────────────────────────────────┘
-📂 Repository Structure
-tree
-CiteVerify/
-├── api/                             # FastAPI Backend Service
-│   ├── main.py                      # Application Entrypoint & Middleware
-│   ├── routers/
-│   │   ├── audit.py                 # Core Verification & Pipeline Endpoints
-│   │   ├── parse.py                 # Document Parsing & Chunking Router
-│   │   └── resolver.py              # DOI & Scholarly Retrieval Router
-│   ├── services/
-│   │   ├── claim_extractor.py       # SciBERT Claim Isolation Engine
-│   │   ├── citation_linker.py       # In-Text Citation Anchor Resolver
-│   │   ├── retrieval_swarm.py       # CrossRef, OpenAlex, Semantic Scholar
-│   │   ├── evidence_ranker.py       # Dense Bi-Encoder & Cross-Encoder
-│   │   ├── nli_classifier.py        # 5-Tier NLI Model Inference Core
-│   │   └── retraction_guard.py      # Retraction Watch & CrossMark Checks
-│   └── models/                      # Pydantic Schemas & DTOs
-│
-├── frontend/                        # Next.js / Tailwind UI
-│   ├── src/
-│   │   ├── components/              # Interactive Claim Cards & Modals
-│   │   │   ├── AuditDashboard.tsx   # Real-time Claim-by-Claim Feed
-│   │   │   ├── ClaimCard.tsx        # Side-by-Side Verification Diff
-│   │   │   ├── EvidenceViewer.tsx   # Source Passage Highlighter
-│   │   │   └── MetricGauge.tsx      # Integrity Score Circular Visualizer
-│   │   └── app/page.tsx             # Main Upload & Analysis View
-│
-├── evaluation/                      # Benchmark Suites & Validation
-│   ├── benchmarks/                  # SciFact, FEVER-Sci, COVID-Fact Datasets
-│   ├── run_eval.py                  # Evaluation Runner & F1 Score Reporter
-│   └── confusion_matrix.png         # Model Accuracy Visualizations
-│
-├── sample_data/                     # Pre-packaged Demonstration Files
-│   ├── synthetic_biology_paper.pdf  # Sample containing exaggerated metrics
-│   ├── clean_physics_review.pdf     # Sample benchmark 100% verified
-│   └── retracted_citation_case.tex  # Sample citing a retracted paper
-│
-├── requirements.txt                 # Python Dependencies
-├── docker-compose.yml               # Local Multi-Container Deployment
-└── README.md                        # Documentation
-🚀 Quickstart & Setup Guide
-1. Prerequisites
-Python 3.10 or higher
-Node.js 18+ (for frontend)
-Git & Git LFS (for NLP model checkpoints)
-2. Clone the Repository
-bash
-git clone https://github.com/YourTeam/CiteVerify.git
+### 1. Clone the Repository
+```bash
+git clone https://github.com/rachana15088-rgb/CiteVerify.git
 cd CiteVerify
-3. Backend Setup
-bash
-# Create and activate virtual environment
+```
+
+### 2. Set Up Python Virtual Environment
+```bash
 python -m venv venv
+
 # On Windows:
-.\venv\Scripts\activate
+venv\Scripts\activate
+
 # On Linux/macOS:
 source venv/bin/activate
-# Install Python requirements
+```
+
+### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
-# Download required scientific NLP models
 python -m spacy download en_core_web_sm
-4. Configure Environment Variables
+```
 
-Create a .env file in the root directory:
+### 4. Configure Environment
+Create a `.env` file in the root directory:
+```env
+# Optional API email for polite pool (faster response from CrossRef & OpenAlex)
+CROSSREF_MAILTO=your-email@university.edu
+OPENALEX_EMAIL=your-email@university.edu
+```
 
-env
-# Server
-PORT=8000
-ENVIRONMENT=development
-# Optional Scholarly API Tokens (Free tier works without tokens, but increases rate limits)
-CROSSREF_MAILTO=your-email@academic.edu
-SEMANTIC_SCHOLAR_API_KEY=your_key_here
-OPENALEX_EMAIL=your-email@academic.edu
-5. Launch CiteVerify
-bash
-# Terminal 1: Launch FastAPI Backend
-uvicorn api.main:app --reload --port 8000
-# Terminal 2: Launch Web Interface
-cd frontend
-npm install
-npm run dev
+### 5. Run the Application
+```bash
+# To run the Streamlit UI:
+streamlit run app.py
 
-Visit http://localhost:3000 to interact with the CiteVerify interface!
+# Or to run the FastAPI backend:
+uvicorn backend.main:app --reload --port 8000
+```
 
-📊 Evaluation, Benchmarks & Precision
+Open `http://localhost:8501` (Streamlit) or `http://localhost:8000` (FastAPI Docs) in your browser.
 
-CiteVerify has been quantitatively evaluated against established scientific claim verification datasets including SciFact (Wadden et al.) and COVID-Fact:
+---
 
-Task / Metric	SciFact Benchmark	COVID-Fact Benchmark	CiteVerify Engine
-Claim Detection F1	81.4%	84.1%	88.7%
-Citation Resolution Accuracy	89.2%	91.5%	96.3%
-Evidence Retrieval (Recall@3)	78.5%	82.0%	89.4%
-NLI Verdict Classification F1	76.2%	79.8%	85.1%
-Average Per-Claim Latency	4.8s	5.1s	1.9s (with caching)
-                       VERDICT ACCURACY BY CLASS
-  ┌─────────────────────────────────────────────────────────────┐
-  │ Supported           [████████████████████████████░░]  92.4% │
-  │ Partially Supported [███████████████████████░░░░░░]  78.9% │
-  │ Unsupported         [██████████████████████████░░░]  87.2% │
-  │ Contradictory       [█████████████████████████░░░░]  84.6% │
-  │ Retracted / Outdated[█████████████████████████████]  98.1% │
-  └─────────────────────────────────────────────────────────────┘
-🛡️ Academic Trust & Anti-Hallucination Framework
+## 🛡️ Build for Academic Trust: Guiding Principles
 
-CAUTION
+CiteVerify is engineered around strict ethical safeguards for academic integrity:
 
-A citation is not proof by itself, and an AI output is not a final peer review.
+1. **A Citation is Not Proof**: Having a bibliography does not validate a paper; the evidence must back the text.
+2. **Explainable Findings**: Every automated flag presents the verbatim source passage, the matched DOI, and the reason for the discrepancy.
+3. **Calibrated Confidence**: Confidence indicators reflect evidence strength and uncertainty—never an absolute mathematical guarantee.
+4. **Human-in-the-Loop**: CiteVerify serves as an intelligent co-pilot for students, researchers, and reviewers. Findings are open for human verification and contextual judgment.
 
-CiteVerify follows four unshakeable design principles for responsible academic deployment:
+---
 
-Non-Destructive Auditability: CiteVerify never alters the original manuscript. Every proposed flag is rendered as an annotative layer with deep links back to the original source passage.
-Deterministic Passage Extraction: Claims are evaluated against verbatim extracted paragraphs from the cited research paper—never against hallucinated LLM parametric memory.
-Honest Uncertainty Bounds: When an external paper is paywalled or cannot be resolved, CiteVerify explicitly flags the entry as UNRESOLVED / MANUAL REVIEW REQUIRED rather than guessing.
-Human Reviewer Sovereignty: The system empowers human researchers, reviewers, and professors to accept, reject, or comment on any finding, generating a signed audit log for thesis committees and journals.
-🔮 Roadmap & Future Horizons
- Full-Text PDF & LaTeX citation extraction
- Multi-source API integration (CrossRef, Semantic Scholar, OpenAlex)
- 5-Tier Scientific NLI classification engine
- Retraction Watch integration
- Phase 2 (Q3 2026): Direct Overleaf & LaTeX plugin for real-time writing verification
- Phase 3 (Q4 2026): Multi-hop citation synthesis (detecting citation chaining and cascading distortion across 5+ paper lineages)
- Phase 4: Institutional Dashboard for University Research Integrity Officers
-👥 Contributing & Team
+## 🔮 Future Scope
 
-Developed with passion for INNOVEDGE Hackathon 2026 by Team CiteVerify.
-
-  ┌───────────────────────────────────────────────────────────────┐
-  │                      TEAM CITEVERIFY                          │
-  ├───────────────────────────────┬───────────────────────────────┤
-  │ Role                          │ Responsibilities              │
-  ├───────────────────────────────┼───────────────────────────────┤
-  │ Lead Architect & NLP Eng      │ Pipeline, SciBERT, NLI Engine │
-  │ Full-Stack & UI/UX Specialist │ Next.js, Dashboard, Exporters │
-  │ API & Distributed Systems     │ CrossRef, OpenAlex, Caching   │
-  │ Academic Integrity Research   │ Taxonomy, Evaluation, Testing │
-  └───────────────────────────────┴───────────────────────────────┘
-📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-CiteVerify — Making scientific literature transparent, verifiable, and immune to misinformation.
+- **Overleaf & Word Add-in**: Real-time citation verification as researchers write.
+- **Cascading Citation Tracker**: Detect citation distortion chains across multiple generations of cited papers.
+- **Predatory Journal Detection**: Automatically flag citations from unindexed or predatory publishers.
+- **Multi-Lingual Paper Verification**: Verify non-English academic literature and cross-lingual citations.
