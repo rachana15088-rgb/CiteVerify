@@ -60,6 +60,7 @@ type SourceMeta = {
   url: string;
   abstract: string;
   found: boolean;
+  title?: string;
 };
 
 function normalizeVerdict(raw: unknown): Verdict {
@@ -70,10 +71,18 @@ function normalizeVerdict(raw: unknown): Verdict {
 }
 
 function parseReference(ref: string) {
-  const parts = (ref || "").split(/\.\s+/);
+  // Initials in author names and periods inside titles are not sentence boundaries.
+  const initials = ref.match(/^((?:[\p{L}][\p{L}'’-]*(?:\s+[\p{L}][\p{L}'’-]*)*,?\s+(?:\p{L}\.\s*)+(?:[,;]\s*)?)+)/u);
+  const initialsFirst = initials ? null : ref.match(/^((?:(?:\p{L}\.\s*)+[\p{L}][\p{L}'’-]*(?:,\s*|\s+(?:and|&)\s+|\.\s+))+)/u);
+  const simple = initials || initialsFirst ? null : ref.match(/^([^.]*)\.\s+/);
+  const prefix = initials?.[0] || initialsFirst?.[0] || simple?.[0] || "";
+  const title = ref.slice(prefix.length)
+    .replace(/^\(?\b(?:19|20)\d{2}\b\)?\.\s*/, "")
+    .replace(/\.\s*\(?\b(?:19|20)\d{2}\b\)?\.?\s*$/, "")
+    .replace(/\.\s*$/, "").trim();
   return {
-    authors: parts[0] || "",
-    title: parts[1] || (ref || "").slice(0, 160),
+    authors: prefix.trim().replace(/\.\s*$/, ""),
+    title: title || ref.slice(0, 160),
   };
 }
 
@@ -96,16 +105,27 @@ async function fetchCrossRefSource(ref: string): Promise<SourceMeta> {
     if (!res.ok) return { doi: "", url: "", abstract: "", found: false };
     const data = await res.json();
     const candidates = data?.message?.items;
-    const item = Array.isArray(candidates) ? candidates.find((candidate) =>
-      Array.isArray(candidate.title) && candidate.title.some((title: unknown) =>
-        typeof title === "string" && titlesMatch(parsed.title, title))) : undefined;
+    let matchedTitle = "";
+    const item = Array.isArray(candidates) ? candidates.find((candidate) => {
+      // Remove a journal suffix only when CrossRef identifies that journal.
+      const expected = Array.isArray(candidate["container-title"])
+        ? candidate["container-title"].reduce((value: string, journal: unknown) => {
+            if (typeof journal !== "string" || !journal.trim()) return value;
+            const suffix = `. ${journal.trim()}`;
+            return value.toLowerCase().endsWith(suffix.toLowerCase())
+              ? value.slice(0, -suffix.length) : value;
+          }, parsed.title) : parsed.title;
+      matchedTitle = Array.isArray(candidate.title) ? candidate.title.find((title: unknown) =>
+        typeof title === "string" && titlesMatch(expected, title)) || "" : "";
+      return Boolean(matchedTitle);
+    }) : undefined;
     if (!item) return { doi: "", url: "", abstract: "", found: false };
 
     const doi = item.DOI || "";
     const url = item.URL || (doi ? `https://doi.org/${doi}` : "");
     const abstract = stripXml(item.abstract || "");
 
-    return { doi, url, abstract, found: Boolean(doi || url) };
+    return { doi, url, abstract, found: Boolean(doi || url), title: matchedTitle };
   } catch {
     return { doi: "", url: "", abstract: "", found: false };
   }
@@ -118,7 +138,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No PDF uploaded" }, { status: 400 });
     }
 
-    if (file.type !== "application/pdf") {
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
       throw new UploadError("Upload must be a PDF", 400);
     }
     const bytes = new Uint8Array(await file.arrayBuffer());
@@ -317,7 +337,7 @@ export async function POST(req: Request) {
           : it.sentence,
         citation: {
           marker: it.marker,
-          title: it.ref ? parsed.title : "Not found in reference list",
+          title: it.ref ? src?.title || parsed.title : "Not found in reference list",
           authors: it.ref ? parsed.authors : "",
           year: Number(it.ref.match(/\b(19|20)\d{2}\b/)?.[0]) || null,
           doi: src?.doi || "",

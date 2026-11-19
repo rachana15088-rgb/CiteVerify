@@ -15,9 +15,9 @@ function load(path, mocks, globals = {}) {
   return exports
 }
 const verdicts = ['supported', 'partly_supported', 'unsupported', 'contradictory', 'possibly_outdated', 'reference_not_found', 'needs_human_review']
-function route({ abstract = 'The study found no effect.', match = true, confidence = 0, parserError = false, pages = 1, modelOutput } = {}) {
+function route({ abstract = 'The study found no effect.', match = true, confidence = 0, parserError = false, pages = 1, modelOutput, reference = 'Smith. A randomized intervention study. 2020.', candidateTitle = 'A randomized intervention study', journal } = {}) {
   const calls = []
-  const text = 'Paper title\n' + 'Background context. '.repeat(15) + 'The intervention has an effect [1]. References [1] Smith. A randomized intervention study. 2020.'
+  const text = 'Paper title\n' + 'Background context. '.repeat(15) + 'The intervention has an effect [1]. References [1] ' + reference
   const api = load('app/api/analyze/route.ts', {
     'next/server': { NextResponse: { json: (data, options) => Response.json(data, options) } },
     '@/lib/verdicts': { VERDICT_ORDER: verdicts },
@@ -29,27 +29,58 @@ function route({ abstract = 'The study found no effect.', match = true, confiden
     calls.push({ url, options })
     if (url.includes('crossref')) return Response.json({ message: { items: [
       { title: ['Unrelated publication'], DOI: 'wrong' },
-      { title: [match ? 'A randomized intervention study' : 'Other publication'], DOI: '10.test/valid', abstract },
+      { title: [match ? candidateTitle : 'Other publication'], 'container-title': journal ? [journal] : [], DOI: '10.test/valid', abstract },
     ] } })
     const output = modelOutput?.(calls.filter(c => c.options?.method === 'POST').length) ?? [{ id: 'c1', verdict: 'supported', confidence, evidence_quote: 'fabricated quote' }]
     return Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify(output) }] } }] })
   } })
   return { ...api, calls }
 }
-function request(content = '%PDF-test', type = 'application/pdf') {
+function request(content = '%PDF-test', type = 'application/pdf', name = 'paper.pdf') {
   const form = new FormData()
-  form.set('file', new File([content], 'paper.pdf', { type }))
+  form.set('file', new File([content], name, { type }))
   return new Request('https://test/api/analyze', { method: 'POST', body: form })
 }
 test('rejects upload type, signature, excessive pages and malformed PDF', async () => {
   for (const [options, req, status] of [
-    [{}, request('not PDF'), 400], [{}, request('%PDF-test', 'text/plain'), 400],
+    [{}, request('not PDF'), 400], [{}, request('%PDF-test', 'text/plain', 'paper.txt'), 400],
     [{ pages: 101 }, request(), 413], [{ parserError: true }, request(), 422],
   ]) {
     const res = await route(options).POST(req)
     assert.equal(res.status, status)
     assert.doesNotMatch(await res.text(), /private parser details/)
   }
+})
+test('accepts PDF declarations used by the upload zone but still checks the signature', async () => {
+  for (const [type, name] of [['', 'paper.pdf'], ['application/octet-stream', 'PAPER.PDF'], ['text/plain', 'paper.pdf'], ['application/pdf', 'paper']]) {
+    assert.equal((await route().POST(request('%PDF-test', type, name))).status, 200)
+    assert.equal((await route().POST(request('not PDF', type, name))).status, 400)
+  }
+  for (const type of ['', 'application/octet-stream']) {
+    assert.equal((await route().POST(request('%PDF-test', type, 'paper.txt'))).status, 400)
+  }
+})
+test('matches the entire title after author initials, including internal periods', async () => {
+  const reference = 'Smith, J. Doe, A. A randomized intervention study. Part two. 2020.'
+  const candidateTitle = 'A randomized intervention study. Part two'
+  const api = route({ reference, candidateTitle })
+  const result = (await (await api.POST(request())).json()).results[0]
+  assert.equal(result.citation.title, candidateTitle)
+  assert.equal(result.citation.authors, 'Smith, J. Doe, A')
+  assert.equal(result.citation.doi, '10.test/valid')
+  assert.equal(new URL(api.calls[0].url).searchParams.get('query.bibliographic'), candidateTitle)
+  const unrelated = route({ reference, match: false })
+  const rejected = (await (await unrelated.POST(request())).json()).results[0]
+  assert.equal(rejected.citation.doi, '')
+  assert.equal(rejected.evidence.source_access, 'none')
+  const initialsFirst = route({ reference: 'J. Smith and A. Doe. ' + candidateTitle + '. 2020.', candidateTitle })
+  const firstResult = (await (await initialsFirst.POST(request())).json()).results[0]
+  assert.equal(firstResult.citation.title, candidateTitle)
+  assert.equal(firstResult.citation.doi, '10.test/valid')
+  const journal = route({ reference: 'Smith. ' + candidateTitle + '. Journal of tests. 2020.', candidateTitle, journal: 'Journal of tests' })
+  const journalResult = (await (await journal.POST(request())).json()).results[0]
+  assert.equal(journalResult.citation.title, candidateTitle)
+  assert.equal(journalResult.citation.doi, '10.test/valid')
 })
 test('counts actual request bytes even when Content-Length lies', async () => {
   const req = new Request('https://test/api/analyze', { method: 'POST', body: 'x'.repeat(10 * 1024 * 1024 + 1), headers: { 'Content-Length': '1' } })
