@@ -1,18 +1,11 @@
-<p align="center">
-  <img src="[https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,11,24&height=220&section=header&text=CiteVerify&fontSize=62&fontAlignY=36&fontColor=ffffff&desc=Scientific%20Claim%20%26%20Citation%20Verification%20Engine&descFontSize=20&descAlignY=58&descAlign=50](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,11,24&height=220&section=header&text=CiteVerify&fontSize=62&fontAlignY=36&fontColor=ffffff&desc=Scientific%20Claim%20%26%20Citation%20Verification%20Engine&descFontSize=20&descAlignY=58&descAlign=50)" alt="CiteVerify Banner" width="100%" />
-</p>
+# 🔬 CiteVerify
+### Scientific Claim & Citation Verification Engine
 
-<p align="center">
-  <img src="[https://img.shields.io/badge/Problem%20Statement-03%20CiteVerify-blueviolet?style=for-the-badge&logo=googlescholar](https://img.shields.io/badge/Problem%20Statement-03%20CiteVerify-blueviolet?style=for-the-badge&logo=googlescholar)" alt="Problem Statement 03" />
-  <img src="[https://img.shields.io/badge/Domain-Research%20Tech%20%26%20Academic%20Integrity-blue?style=for-the-badge](https://img.shields.io/badge/Domain-Research%20Tech%20%26%20Academic%20Integrity-blue?style=for-the-badge)" alt="Domain" />
-  <img src="[https://img.shields.io/badge/Verification-5--Tier%20Explainable%20Taxonomy-emerald?style=for-the-badge](https://img.shields.io/badge/Verification-5--Tier%20Explainable%20Taxonomy-emerald?style=for-the-badge)" alt="Taxonomy" />
-  <img src="[https://img.shields.io/badge/Compliance-Human--In--The--Loop%20Audit-amber?style=for-the-badge](https://img.shields.io/badge/Compliance-Human--In--The--Loop%20Audit-amber?style=for-the-badge)" alt="Human In The Loop" />
-  <img src="[https://img.shields.io/badge/Hackathon-INNOVEDGE%202026-orange?style=for-the-badge](https://img.shields.io/badge/Hackathon-INNOVEDGE%202026-orange?style=for-the-badge)" alt="INNOVEDGE 2026" />
-</p>
+`Problem Statement: 03 CiteVerify` • `Domain: Research Tech & Academic Integrity` • `Verification: 5-Tier Explainable Taxonomy` • `Compliance: Human-In-The-Loop Audit` • `Hackathon: INNOVEDGE 2026`
 
-<p align="center">
-  <b>CiteVerify</b> is an intelligent, evidence-grounded academic verification platform that audits scientific papers, extracts claims and citation anchors, retrieves original literature via DOIs/scholarly APIs, and checks whether cited sources genuinely prove what authors claim.
-</p>
+> **CiteVerify** is an intelligent, evidence-grounded academic verification platform that audits scientific papers, extracts claims and citation anchors, retrieves original literature via DOIs/scholarly APIs, and checks whether cited sources genuinely prove what authors claim.
+
+
 
 ---
 
