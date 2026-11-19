@@ -5,8 +5,6 @@
 
 > **CiteVerify** is an intelligent, evidence-grounded academic verification platform that audits scientific papers, extracts claims and citation anchors, retrieves original literature via DOIs/scholarly APIs, and checks whether cited sources genuinely prove what authors claim.
 
-
-
 ---
 
 ## 📌 Table of Contents
@@ -18,7 +16,6 @@
 - [🔬 Interactive Verification Result Anatomy](#-interactive-verification-result-anatomy)
 - [🌐 Multi-Corpus Retrieval Swarm](#-multi-corpus-retrieval-swarm)
 - [🛠️ Tech Stack](#️-tech-stack)
-- [🚀 Quickstart & Setup Guide](#-quickstart--setup-guide)
 - [🛡️ Build for Academic Trust: Guiding Principles](#️-build-for-academic-trust-guiding-principles)
 - [🔮 Future Scope](#-future-scope)
 
@@ -43,11 +40,11 @@ In academic writing, students, researchers, and reviewers rely on citations to v
 
 | Capability | Functionality |
 | :--- | :--- |
-| **📑 Document & Claim Extraction** | Parses PDF, DOCX, and LaTeX papers to extract testable claims, statistics, percentages, and methodological findings. |
+| **📑 Document & Claim Extraction** | Parses PDF papers to extract testable claims, statistics, percentages, and methodological findings. |
 | **🔗 Citation Detection & Mapping** | Resolves in-text markers (`[1]`, `[12-15]`, Author-Year) and links them precisely to entries in the bibliography. |
 | **🔎 Original Paper Retrieval** | Queries scholarly indexes (CrossRef, OpenAlex, Semantic Scholar, arXiv, PubMed) via DOI, title, and authors. |
 | **📊 Evidence Passage Extraction** | Employs dense passage retrieval to locate the exact paragraphs, result tables, and caveats inside the original paper. |
-| **⚖️ Claim Status Classification** | Categorizes claims into a 5-tier explainable taxonomy (Supported, Partly Supported, Unsupported, Contradictory, Outdated). |
+| **⚖️ Claim Status Classification** | Categorizes claims into a 5-tier explainable taxonomy (Supported, Partly Supported, Unsupported, Contradictory, Needs Human Review). |
 | **🚩 Misleading Reference Detection** | Flags ghost citations, circular references, paper-mill patterns, and mismatched claims. |
 | **🔍 Evidence & Source Traceability** | Displays side-by-side claim vs. source passage, page number, and direct external DOI links. |
 | **📋 Auditable Verification Report** | Exports a structured, calibrated report with confidence indicators for human reviewers. |
@@ -61,7 +58,7 @@ CiteVerify is built as a modular, end-to-end pipeline combining natural language
 ```mermaid
 flowchart TB
     subgraph INGESTION["1. INGESTION & DOCUMENT EXTRACTION"]
-        DOC["📄 Upload Document<br/>(PDF / LaTeX / DOCX)"] --> PARSER["Document Layout Parser<br/>(Grobid / PyMuPDF)"]
+        DOC["📄 Upload Document<br/>(PDF)"] --> PARSER["Document Layout Parser<br/>(Grobid / PyMuPDF)"]
         PARSER --> CHUNKS["Sentence & Paragraph Splitter"]
         PARSER --> BIBLIO["Bibliography & Reference List Extractor"]
     end
@@ -147,7 +144,7 @@ CiteVerify replaces binary "true/false" checks with an explainable, 5-state acad
 | **Partly Supported** | 🟡 **PARTIAL** | General premise is mentioned, but figures differ, or scope is magnified. |
 | **Unsupported** | 🔴 **NO PROOF** | Cited paper makes no mention of the specific claim or numbers asserted. |
 | **Contradictory** | 🟣 **CONFLICT** | Source paper's findings directly refute or contradict the author's statement. |
-| **Outdated / Retracted** | 🟠 **RETRACTED** | Paper has a formal retraction notice or is superseded by consensus reviews. |
+| **Needs Human Review** | 🟠 **HUMAN REVIEW** | Paywalled source, nuanced context, or ambiguous evidence requiring manual expert inspection. |
 
 ---
 
@@ -177,7 +174,7 @@ Every analyzed claim produces a structured, transparent result card:
 │ change in a small pilot group. The asserted 30% metric is NOT supported by   │
 │ the cited paper.                                                             │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ 📊 CONFIDENCE: 92% (High Confidence)   | 🔗 SOURCE TRACE: https://doi.org/... │
+│ 📊 CONFIDENCE: 92% (High Confidence)   | 🔗 SOURCE TRACE: [https://doi.org/](https://doi.org/)... │
 │ 🚩 FLAG: Needs Human Review (Metric discrepancy detected)                     │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -227,52 +224,6 @@ CiteVerify queries a resilient federation of academic data providers:
 
 ---
 
-## 🚀 Quickstart & Setup Guide
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/rachana15088-rgb/CiteVerify.git
-cd CiteVerify
-```
-
-### 2. Set Up Python Virtual Environment
-```bash
-python -m venv venv
-
-# On Windows:
-venv\Scripts\activate
-
-# On Linux/macOS:
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
-pip install -r requirements.txt
-python -m spacy download en_core_web_sm
-```
-
-### 4. Configure Environment
-Create a `.env` file in the root directory:
-```env
-# Optional API email for polite pool (faster response from CrossRef & OpenAlex)
-CROSSREF_MAILTO=your-email@university.edu
-OPENALEX_EMAIL=your-email@university.edu
-```
-
-### 5. Run the Application
-```bash
-# To run the Streamlit UI:
-streamlit run app.py
-
-# Or to run the FastAPI backend:
-uvicorn backend.main:app --reload --port 8000
-```
-
-Open `http://localhost:8501` (Streamlit) or `http://localhost:8000` (FastAPI Docs) in your browser.
-
----
-
 ## 🛡️ Build for Academic Trust: Guiding Principles
 
 CiteVerify is engineered around strict ethical safeguards for academic integrity:
@@ -290,3 +241,4 @@ CiteVerify is engineered around strict ethical safeguards for academic integrity
 - **Cascading Citation Tracker**: Detect citation distortion chains across multiple generations of cited papers.
 - **Predatory Journal Detection**: Automatically flag citations from unindexed or predatory publishers.
 - **Multi-Lingual Paper Verification**: Verify non-English academic literature and cross-lingual citations.
+-
